@@ -1,0 +1,77 @@
+# MonVM <https://monvm.dev>
+# Copyright The MonVM Authors
+# SPDX-License-Identifier: Apache-2.0
+
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+
+version: 2
+project_name: monvm
+
+before:
+  hooks: [make precommit]
+
+builds:
+  - id: monvm
+    main: ./cmd/monvm
+    binary: monvm
+    env: [CGO_ENABLED=0]
+    goos: [linux, darwin]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w
+      - -X github.com/monvm-dev/monvm/internal/buildvars.buildVersion={{ .Tag }}
+      - -X github.com/monvm-dev/monvm/internal/buildvars.buildDate={{ .Date }}
+      - -X github.com/monvm-dev/monvm/internal/buildvars.commitHash={{ .FullCommit }}
+      - -X github.com/monvm-dev/monvm/internal/buildvars.commitDate={{ .CommitDate }}
+      - -X github.com/monvm-dev/monvm/internal/buildvars.commitBranch={{ .Branch }}
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - id: monvm
+    ids: [monvm]
+    formats: [tar.gz]
+    name_template: "monvm_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files: [LICENSE]
+
+checksum:
+  name_template: "monvm_{{ .Version }}_checksums.txt"
+  algorithm: sha512
+
+signs:
+  - artifacts: checksum
+    cmd: cosign
+    signature: "${artifact}.bundle"
+    args: [sign-blob, --yes, "--bundle=${signature}", "${artifact}"]
+    output: true
+
+sboms:
+  - artifacts: archive
+    documents: ["{{ .ArtifactName }}.spdx.json"]
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude: ["^test:", "^chore:", "^ci:"]
+
+release:
+  github: { owner: monvm-dev, name: monvm }
+  draft: false
+  prerelease: auto
+  replace_existing_artifacts: false
+
+brews:
+  - name: monvm
+    ids: [monvm]
+    directory: Formula
+    repository:
+      owner: monvm-dev
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    commit_author:
+      name: monvm-release-bot
+      email: release-bot@monvm.dev
+    homepage: "https://monvm.dev"
+    description: "Lean observability infrastructure"
+    license: "Apache-2.0"
+    test: system "#{bin}/monvm --version"

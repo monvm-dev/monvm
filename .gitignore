@@ -1,0 +1,16 @@
+# MonVM <https://monvm.dev>
+# Copyright The MonVM Authors
+# SPDX-License-Identifier: Apache-2.0
+
+/bin/
+/dist/
+**/.terraform/
+/.idea/
+/.vscode/
+.DS_Store
+/coverage.out
+/temp/
+*~
+*.tfplan
+*.tfstate
+*.tfstate.*

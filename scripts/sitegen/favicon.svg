@@ -1,0 +1,5 @@
+<!-- MonVM <https://monvm.dev> | Copyright The MonVM Authors | SPDX-License-Identifier: Apache-2.0 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="12" fill="#12161c"/>
+  <path d="M13 43V21h7l6 11 6-11h7v22h-7V32l-6 11-6-11v11zm29-22h8l4 13 4-13h7l-8 22h-7z" fill="#ff8a3d"/>
+</svg>

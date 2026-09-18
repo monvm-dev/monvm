@@ -1,0 +1,23 @@
+# MonVM <https://monvm.dev>
+# Copyright The MonVM Authors
+# SPDX-License-Identifier: Apache-2.0
+
+name: Lint, Test, & Build
+on:
+  push: { branches: [main] }
+  pull_request:
+  workflow_dispatch:
+concurrency: { group: "ci-${{ github.workflow }}-${{ github.ref }}", cancel-in-progress: true }
+permissions: { contents: read }
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: jdx/mise-action@5ac50f778e26fac95da98d50503682459e86d566 # v3.2.0
+      - uses: opentofu/setup-opentofu@a1320f892987e89d278cc92dc5adc984fb93aca4 # v2.0.2
+        with: { tofu_version: 1.12.5, tofu_wrapper: false }
+      - run: make precommit lint test build website
+      - uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
+        with: { distribution: goreleaser, version: v2.15.2, args: check }

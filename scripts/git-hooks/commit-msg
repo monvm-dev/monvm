@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# MonVM <https://monvm.dev>
+# Copyright The MonVM Authors
+# SPDX-License-Identifier: Apache-2.0
+
+set -eo pipefail
+
+# Enforce a Developer Certificate of Origin sign-off on every commit.
+# Skips merge, squash, fixup, and amend commits.
+
+commit_msg_file="$1"
+msg=$(grep -v '^#' "$commit_msg_file" || true)
+
+case "$msg" in
+  "Merge "*|"Revert \"Merge "*|"fixup! "*|"squash! "*|"amend! "*)
+    exit 0
+    ;;
+esac
+
+if ! grep -qE '^Signed-off-by: .+ <.+@.+>$' "$commit_msg_file"; then
+  echo "ERROR: missing Signed-off-by line." >&2
+  echo "Commit with 'git commit -s' to add a Developer Certificate of Origin sign-off." >&2
+  exit 1
+fi

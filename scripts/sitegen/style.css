@@ -1,0 +1,20 @@
+/* MonVM <https://monvm.dev> | Copyright The MonVM Authors | SPDX-License-Identifier: Apache-2.0 */
+:root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; line-height: 1.65; background: #0b0d10; color: #d9dde5; }
+body { margin: 0; background: radial-gradient(circle at 75% 0, #3b210f55, transparent 28rem), #0b0d10; }
+nav, main, footer { box-sizing: border-box; margin: auto; max-width: 64rem; padding: 1.2rem 2rem; }
+nav { align-items: center; border-bottom: 1px solid #ffffff18; display: flex; justify-content: space-between; }
+nav div { display: flex; gap: 1.8rem; }
+.brand { color: #fff; font-size: 1.15rem; font-weight: 900; letter-spacing: .14em; text-decoration: none; }
+.brand span, a { color: #ff8a3d; }
+main { min-height: calc(100vh - 11rem); padding-bottom: 4rem; padding-top: 3rem; }
+h1 { color: #fff; font-size: clamp(2.2rem, 7vw, 4.5rem); letter-spacing: -.055em; line-height: 1.02; margin: 0 0 2rem; max-width: 16ch; }
+h2 { border-top: 1px solid #ffffff18; color: #fff; margin-top: 3.5rem; padding-top: 2rem; }
+h3 { color: #fff; }
+p, li { max-width: 48rem; }
+pre { background: #12161c; border: 1px solid #ffffff1c; border-radius: .6rem; overflow: auto; padding: 1.2rem; }
+code { color: #f5c09b; font-family: ui-monospace, SFMono-Regular, monospace; }
+table { border-collapse: collapse; display: block; overflow: auto; width: 100%; }
+th, td { border-bottom: 1px solid #ffffff1c; padding: .65rem 1rem; text-align: left; }
+th { color: #fff; }
+footer { border-top: 1px solid #ffffff18; color: #8f97a5; font-size: .9rem; }
+@media (max-width: 600px) { nav, main, footer { padding-left: 1.1rem; padding-right: 1.1rem; } nav div { gap: 1rem; } }

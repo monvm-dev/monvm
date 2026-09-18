@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# MonVM <https://monvm.dev>
+# Copyright The MonVM Authors
+# SPDX-License-Identifier: Apache-2.0
+
+set -eo pipefail
+
+echo "Running pre-commit checks..."
+make precommit
+echo "Pre-commit checks passed."
