@@ -122,11 +122,13 @@ variable "metrics_allowed_cidrs" {
   type        = list(string)
   description = "IPv4 and IPv6 CIDRs allowed to reach the metrics endpoint."
   default     = []
+  nullable    = false
 }
 variable "logs_allowed_cidrs" {
   type        = list(string)
   description = "IPv4 and IPv6 CIDRs allowed to reach the logs endpoint."
   default     = []
+  nullable    = false
 }
 variable "metrics_artifact" {
   description = "Verified VictoriaMetrics artifact mirrored into S3."

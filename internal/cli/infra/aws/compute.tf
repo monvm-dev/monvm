@@ -125,7 +125,7 @@ resource "aws_instance" "host" {
   ipv6_address_count          = 1
   iam_instance_profile        = aws_iam_instance_profile.instance.name
   user_data_replace_on_change = true
-  user_data = templatefile("${path.module}/userdata.sh.tftpl", {
+  user_data_base64 = base64gzip(templatefile("${path.module}/userdata.sh.tftpl", {
     region               = var.region
     bucket               = var.bucket
     architecture         = var.architecture
@@ -158,7 +158,7 @@ resource "aws_instance" "host" {
     envoy_sha256         = var.envoy_artifact.sha256
     trust_enroll         = filebase64("${path.module}/trust-enroll.sh")
     trust_refresh        = filebase64("${path.module}/trust-refresh.sh")
-  })
+  }))
   root_block_device {
     encrypted   = true
     volume_type = "gp3"

@@ -31,7 +31,7 @@ download_object() {
   local object_key="$1" expected="$2"
   local archive="/tmp/$${object_key##*/}"
   aws s3 cp "s3://${bucket}/$object_key" "$archive" --region "${region}" \
-    --endpoint-url "https://s3.dualstack.${region}.amazonaws.com"
+    --endpoint-url "https://s3.dualstack.${region}.amazonaws.com" --only-show-errors
   printf '%s  %s\n' "$expected" "$archive" | sha256sum --check --status
   printf '%s\n' "$archive"
 }
@@ -176,6 +176,9 @@ ipv4_gateway=$4
 ipv6=$5
 ipv6_cidr=$6
 table=$7
+[[ "$ipv4" == - ]] && ipv4=
+[[ "$ipv4_cidr" == - ]] && ipv4_cidr=
+[[ "$ipv4_gateway" == - ]] && ipv4_gateway=
 interface=
 for _ in $(seq 1 300); do
   for path in /sys/class/net/*; do
@@ -222,7 +225,7 @@ ENV
   install_oneshot \
     "monvm-$service-network" \
     "Configure the MonVM $service service ENI" \
-    "/usr/local/sbin/monvm-configure-service-network $mac $private_ipv4 ${subnet_ipv4_cidr} ${subnet_ipv4_gateway} $ipv6 ${subnet_ipv6_cidr} $table" \
+    "/usr/local/sbin/monvm-configure-service-network $mac $${private_ipv4:--} ${subnet_ipv4_cidr != "" ? subnet_ipv4_cidr : "-"} ${subnet_ipv4_gateway != "" ? subnet_ipv4_gateway : "-"} $ipv6 ${subnet_ipv6_cidr} $table" \
     network-online.target envoy.service '' true
 
   if [[ ! -s "$root/envoy/server-ca.key" || ! -s "$root/envoy/server-ca.crt" ]]; then
@@ -391,7 +394,7 @@ install_daemon \
   victoria-metrics \
   'VictoriaMetrics single-node database' \
   victoria-metrics \
-  '/usr/local/bin/victoria-metrics -httpListenAddr=127.0.0.1:8428 -storageDataPath=/var/lib/victoria-metrics -retentionPeriod=${metrics_retention}' \
+  '/usr/local/bin/victoria-metrics -httpListenAddr=127.0.0.1:18428 -storageDataPath=/var/lib/victoria-metrics -retentionPeriod=${metrics_retention}' \
   network-online.target '' /var/lib/victoria-metrics SIGINT
 configure_service metrics VictoriaMetrics "${metrics_ipv6}" "${metrics_ipv4}" "${metrics_private_ipv4}" "${metrics_mac}" 100 /var/lib/victoria-metrics
 %{ endif ~}
@@ -405,7 +408,7 @@ install_daemon \
   victoria-logs \
   'VictoriaLogs single-node database' \
   victoria-logs \
-  '/usr/local/bin/victoria-logs -httpListenAddr=127.0.0.1:9428 -storageDataPath=/var/lib/victoria-logs -retentionPeriod=${logs_retention} -retention.maxDiskUsagePercent=80' \
+  '/usr/local/bin/victoria-logs -httpListenAddr=127.0.0.1:19428 -storageDataPath=/var/lib/victoria-logs -retentionPeriod=${logs_retention} -retention.maxDiskUsagePercent=80' \
   network-online.target '' /var/lib/victoria-logs SIGINT
 configure_service logs VictoriaLogs "${logs_ipv6}" "${logs_ipv4}" "${logs_private_ipv4}" "${logs_mac}" 101 /var/lib/victoria-logs
 %{ endif ~}
@@ -427,8 +430,8 @@ YAML
 %{ if metrics_enabled ~}write_envoy_listener metrics 8428 /var/lib/victoria-metrics
 %{ endif ~}%{ if logs_enabled ~}write_envoy_listener logs 9428 /var/lib/victoria-logs
 %{ endif ~}printf '  clusters:\n' >>/etc/envoy/envoy.yaml
-%{ if metrics_enabled ~}write_envoy_cluster metrics 8428
-%{ endif ~}%{ if logs_enabled ~}write_envoy_cluster logs 9428
+%{ if metrics_enabled ~}write_envoy_cluster metrics 18428
+%{ endif ~}%{ if logs_enabled ~}write_envoy_cluster logs 19428
 %{ endif ~}
 
 envoy_dependencies=(

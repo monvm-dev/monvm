@@ -8,6 +8,7 @@ set -euo pipefail
 root=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
 temporary=$(mktemp -d)
 trap 'rm -rf "$temporary"' EXIT
+grep -Fq 'user_data_base64 = base64gzip(templatefile(' "$root/internal/cli/infra/aws/compute.tf"
 cp "$root/internal/cli/infra/aws/userdata.sh.tftpl" "$temporary/userdata.sh.tftpl"
 cat >"$temporary/expression" <<'EOF'
 templatefile("userdata.sh.tftpl", {
@@ -46,18 +47,20 @@ for combination in both metrics logs; do
   shellcheck "$temporary/userdata-$combination.sh"
   if [[ "$metrics_enabled" == true ]]; then
     grep -Fq 'mount_volume "vol-0123456789abcdef0" /var/lib/victoria-metrics "20"' "$temporary/userdata-$combination.sh"
-    grep -Fq "'/usr/local/bin/victoria-metrics -httpListenAddr=127.0.0.1:8428" "$temporary/userdata-$combination.sh"
+    grep -Fq "'/usr/local/bin/victoria-metrics -httpListenAddr=127.0.0.1:18428" "$temporary/userdata-$combination.sh"
     grep -Fq 'configure_service metrics VictoriaMetrics "2001:db8::1" "198.51.100.1" "10.73.0.4" "02:00:00:00:00:01" 100' "$temporary/userdata-$combination.sh"
     grep -Fq 'write_envoy_listener metrics 8428 /var/lib/victoria-metrics' "$temporary/userdata-$combination.sh"
+    grep -Fq 'write_envoy_cluster metrics 18428' "$temporary/userdata-$combination.sh"
   elif grep -Fq 'configure_service metrics VictoriaMetrics' "$temporary/userdata-$combination.sh"; then
     echo "metrics service rendered for $combination" >&2
     exit 1
   fi
   if [[ "$logs_enabled" == true ]]; then
     grep -Fq 'mount_volume "vol-0123456789abcdef1" /var/lib/victoria-logs "20"' "$temporary/userdata-$combination.sh"
-    grep -Fq "'/usr/local/bin/victoria-logs -httpListenAddr=127.0.0.1:9428" "$temporary/userdata-$combination.sh"
+    grep -Fq "'/usr/local/bin/victoria-logs -httpListenAddr=127.0.0.1:19428" "$temporary/userdata-$combination.sh"
     grep -Fq 'configure_service logs VictoriaLogs "2001:db8::2" "198.51.100.2" "10.73.0.5" "02:00:00:00:00:02" 101' "$temporary/userdata-$combination.sh"
     grep -Fq 'write_envoy_listener logs 9428 /var/lib/victoria-logs' "$temporary/userdata-$combination.sh"
+    grep -Fq 'write_envoy_cluster logs 19428' "$temporary/userdata-$combination.sh"
   elif grep -Fq 'configure_service logs VictoriaLogs' "$temporary/userdata-$combination.sh"; then
     echo "logs service rendered for $combination" >&2
     exit 1
@@ -67,6 +70,19 @@ for combination in both metrics logs; do
     echo "multiple Envoy services rendered for $combination" >&2
     exit 1
   fi
+  {
+    printf 'base64gzip('
+    cat "$temporary/expression-$combination"
+    printf ')\n'
+  } >"$temporary/expression-$combination-gzip"
+  (cd "$temporary" && tofu console <"expression-$combination-gzip") |
+    tr -d '"\n' | openssl base64 -d -A >"$temporary/userdata-$combination.sh.gz"
+  compressed_size=$(wc -c <"$temporary/userdata-$combination.sh.gz")
+  if ((compressed_size > 16384)); then
+    echo "$combination user data compresses to $compressed_size bytes; EC2 allows at most 16384" >&2
+    exit 1
+  fi
+  gzip -t "$temporary/userdata-$combination.sh.gz"
 done
 
 sed -e 's/metrics_ipv4 = "198.51.100.1"/metrics_ipv4 = ""/' \
@@ -82,8 +98,10 @@ bash -n "$temporary/userdata-ipv6-only.sh"
 shellcheck "$temporary/userdata-ipv6-only.sh"
 grep -Fq 'configure_service metrics VictoriaMetrics "2001:db8::1" "" "" "02:00:00:00:00:01" 100' "$temporary/userdata-ipv6-only.sh"
 grep -Fq 'configure_service logs VictoriaLogs "2001:db8::2" "" "" "02:00:00:00:00:02" 101' "$temporary/userdata-ipv6-only.sh"
+grep -Fq "monvm-configure-service-network \$mac \${private_ipv4:--} - - \$ipv6 2001:db8::/64 \$table" "$temporary/userdata-ipv6-only.sh"
 
 grep -Fq "resize2fs \"\$device\"" "$temporary/userdata-both.sh"
+grep -Fq -- '--endpoint-url "https://s3.dualstack.us-east-1.amazonaws.com" --only-show-errors' "$temporary/userdata-both.sh"
 grep -Fq "subjectAltName=\$san" "$temporary/userdata-both.sh"
 grep -Fq "ExecStart=\$command" "$temporary/userdata-both.sh"
 grep -Fq "ip rule add priority \"\$table\" from \"\$ipv4/32\" table \"\$table\"" "$temporary/userdata-both.sh"
