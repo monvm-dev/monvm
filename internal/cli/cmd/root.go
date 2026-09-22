@@ -23,7 +23,7 @@ func NewRootCommand() *cobra.Command {
 		"monvm %s\nbuild date: %s\ncommit: %s\ncommit date: %s\nbranch: %s\n",
 		buildvars.BuildVersion(), buildvars.BuildDate(), buildvars.CommitHash(), buildvars.CommitDate(), buildvars.CommitBranch(),
 	))
-	root.AddCommand(setupCommand(), teardownCommand(), destroyCommand())
+	root.AddCommand(setupCommand(), teardownCommand(), destroyCommand(), portForwardCommand())
 	silenceUsageForRuntimeErrors(root)
 	return root
 }

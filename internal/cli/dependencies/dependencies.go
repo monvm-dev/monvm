@@ -28,10 +28,14 @@ type Product struct {
 }
 
 var (
+	// VictoriaMetrics describes the supported VictoriaMetrics release artifacts.
 	VictoriaMetrics = Product{Name: "VictoriaMetrics", Repository: "VictoriaMetrics/VictoriaMetrics", Binary: "victoria-metrics-prod", AssetName: victoriaAsset("victoria-metrics")}
-	VictoriaLogs    = Product{Name: "VictoriaLogs", Repository: "VictoriaMetrics/VictoriaLogs", Binary: "victoria-logs-prod", AssetName: victoriaAsset("victoria-logs")}
-	Envoy           = Product{Name: "Envoy", Repository: "envoyproxy/envoy", AssetName: envoyAsset}
-	versionPattern  = regexp.MustCompile(`^v[0-9]+\.[0-9]+\.[0-9]+$`)
+	// VictoriaLogs describes the supported VictoriaLogs release artifacts.
+	VictoriaLogs = Product{Name: "VictoriaLogs", Repository: "VictoriaMetrics/VictoriaLogs", Binary: "victoria-logs-prod", AssetName: victoriaAsset("victoria-logs")}
+	// Envoy describes the supported Envoy release artifacts.
+	Envoy = Product{Name: "Envoy", Repository: "envoyproxy/envoy", AssetName: envoyAsset}
+	// versionPattern recognizes stable semantic release tags.
+	versionPattern = regexp.MustCompile(`^v[0-9]+\.[0-9]+\.[0-9]+$`)
 )
 
 // victoriaAsset returns the release archive naming rule for a Victoria product.

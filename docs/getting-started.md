@@ -22,6 +22,8 @@ go install github.com/monvm-dev/monvm@latest
 
 MonVM selects OpenTofu first and falls back to Terraform. Set `MONVM_TF_CMD` to choose an explicit executable.
 
+Local UI access additionally requires the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) and [AWS Session Manager plugin](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html).
+
 ## Create a deployment
 
 ```sh
@@ -72,6 +74,16 @@ MonVM grows the EBS volumes, replaces the attached compute, and expands each ext
 The TF outputs report stable IPv6 HTTPS URLs for VictoriaMetrics on port 8428 and VictoriaLogs on port 9428. Use VictoriaMetrics-compatible Prometheus remote write and a VictoriaLogs-supported ingestion protocol. Consult the upstream projects for endpoint-specific client configuration.
 
 Both Victoria services bind only to loopback. Independent Envoy listeners own the external metrics and logs endpoints and require TLS 1.3 with a trusted client certificate in addition to the configured CIDR boundary.
+
+## Access the UIs
+
+Forward both private UIs to localhost through AWS Systems Manager:
+
+```sh
+monvm port-forward production
+```
+
+Once both sessions are ready, the command prints the VictoriaMetrics and VictoriaLogs localhost URLs. Keep it running while using the UIs and press Ctrl-C to stop. No public ingress or client certificate is needed for these local forwards because each Systems Manager session connects directly to the service's loopback port on its instance.
 
 ### Optional IPv4 endpoints
 

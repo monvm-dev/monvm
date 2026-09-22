@@ -4,6 +4,8 @@
 
 Instances have no SSH ingress. Use AWS Systems Manager Session Manager for diagnostics. Service security groups allow only explicitly configured IPv4 and IPv6 CIDRs. VictoriaMetrics and VictoriaLogs listen only on loopback; one Envoy process per VM listens on its service ENIs.
 
+Run `monvm port-forward NAME` for temporary localhost access to both UIs without opening ingress. The command starts one Systems Manager port-forwarding session per service, including when both services share a combined instance, and stops both sessions on Ctrl-C.
+
 Both external service endpoints use Envoy, TLS 1.3, and mandatory client certificates in addition to CIDR filtering. If no valid client CA objects are enrolled, that listener uses an unreachable throwaway authority and denies every client.
 
 Envoy reads each service's combined trust bundle through filesystem SDS. Existing source IDs refresh from S3 every 10 minutes and valid changes are installed atomically without restarting Envoy or dropping established connections. Deleting an enrolled object revokes that source on the next successful check. Invalid content and transient S3 failures retain the last-known-good certificate, preventing a broken publisher update from interrupting ingestion.

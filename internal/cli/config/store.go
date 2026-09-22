@@ -25,6 +25,7 @@ type Deployment struct {
 // Store persists deployment metadata in a local directory.
 type Store struct{ Directory string }
 
+// ErrNotFound indicates that a deployment has no local metadata.
 var ErrNotFound = errors.New("deployment is not configured locally")
 
 // ConfigDir returns the platform-appropriate MonVM configuration directory.

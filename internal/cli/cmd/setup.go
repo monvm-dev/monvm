@@ -42,6 +42,7 @@ type serviceEndpoint struct {
 	cidrs []string
 }
 
+// Input validation patterns shared by setup options.
 var (
 	awsRegionPattern = regexp.MustCompile(`^[a-z]{2}(-gov)?-[a-z]+-[0-9]+$`)
 	bucketPattern    = regexp.MustCompile(`^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$`)

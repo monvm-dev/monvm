@@ -32,6 +32,16 @@ The VPC CIDR must be a private `/16` through `/28` and is normalized before it i
 
 IPv4 endpoints are independent. Their EIPs remain attached to the persistent service ENIs across compute replacement, teardown, and combined/split transitions. The first enabled IPv4 endpoint performs a one-time replacement of the IPv6-native subnet and service ENIs with dual-stack equivalents; data volumes remain intact, but IPv6 addresses change and downtime occurs. MonVM keeps the subnet dual-stack thereafter. Passing `--metrics-ipv4=false` or `--logs-ipv4=false` removes and releases the corresponding EIP. IPv4 CIDRs are rejected unless that service's IPv4 endpoint is enabled.
 
+## `monvm port-forward <name>`
+
+Uses AWS Systems Manager to forward both loopback-only UIs to the local machine. It prints the URLs after both forwards are ready and runs until interrupted with Ctrl-C:
+
+```sh
+monvm port-forward production
+```
+
+VictoriaMetrics is available at `http://127.0.0.1:18428` and VictoriaLogs at `http://127.0.0.1:19428`. Use `--metrics-port` or `--logs-port` to select different local ports. The command requires the AWS CLI and AWS Session Manager plugin, uses the deployment's saved region and profile, and binds only to localhost. It works with both combined and split deployments.
+
 ## `monvm teardown <name>`
 
 Removes EC2 compute and attachments while preserving service ENIs, stable public IPv6 addresses, enabled EIPs, encrypted data volumes, network resources, bucket, and state.

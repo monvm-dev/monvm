@@ -12,6 +12,7 @@ import (
 	"regexp"
 )
 
+// namePattern recognizes valid deployment identifiers.
 var namePattern = regexp.MustCompile(`^[a-z]([a-z0-9-]{0,30}[a-z0-9])?$`)
 
 // Artifact contains the immutable S3 location and verification data for a release artifact.

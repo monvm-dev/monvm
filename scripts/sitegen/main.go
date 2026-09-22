@@ -25,6 +25,7 @@ type pageData struct {
 	Body              template.HTML
 }
 
+// generatedHTMLHeader preserves project ownership in generated pages.
 const generatedHTMLHeader = "<!-- MonVM <https://monvm.dev> | Copyright The MonVM Authors | SPDX-License-Identifier: Apache-2.0 -->"
 
 // main renders the documentation website or exits with an error.
