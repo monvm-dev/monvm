@@ -185,8 +185,10 @@ resource "aws_network_interface_attachment" "service" {
 }
 
 resource "aws_volume_attachment" "service" {
-  for_each    = local.active_service_attachments
-  instance_id = aws_instance.host[each.value.host].id
-  volume_id   = aws_ebs_volume.service[each.key].id
-  device_name = each.key == "metrics" ? "/dev/sdf" : "/dev/sdg"
+  for_each                       = local.active_service_attachments
+  instance_id                    = aws_instance.host[each.value.host].id
+  volume_id                      = aws_ebs_volume.service[each.key].id
+  device_name                    = each.key == "metrics" ? "/dev/sdf" : "/dev/sdg"
+  stop_instance_before_detaching = true
+  depends_on                     = [aws_network_interface_attachment.service]
 }
