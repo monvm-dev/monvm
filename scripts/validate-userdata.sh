@@ -107,6 +107,16 @@ grep -Fq "ExecStart=\$command" "$temporary/userdata-both.sh"
 grep -Fq "ip rule add priority \"\$table\" from \"\$ipv4/32\" table \"\$table\"" "$temporary/userdata-both.sh"
 grep -Fq "aws s3 cp \"\$root/envoy/server-ca.crt\"" "$temporary/userdata-both.sh"
 grep -Fq '/usr/local/bin/envoy -c /etc/envoy/envoy.yaml --log-level info' "$temporary/userdata-both.sh"
+grep -Fq '                  signature_algorithms:
+                    - ed25519
+                    - ecdsa_secp256r1_sha256
+                    - rsa_pss_rsae_sha256
+                    - rsa_pkcs1_sha256
+                    - ecdsa_secp384r1_sha384
+                    - rsa_pss_rsae_sha384
+                    - rsa_pkcs1_sha384
+                    - rsa_pss_rsae_sha512
+                    - rsa_pkcs1_sha512' "$temporary/userdata-both.sh"
 grep -Fq 'port_value: 9900' "$temporary/userdata-both.sh"
 ssm_line=$(grep -n '^systemctl restart amazon-ssm-agent$' "$temporary/userdata-both.sh" | cut -d: -f1)
 apt_line=$(grep -n '^apt-get update$' "$temporary/userdata-both.sh" | cut -d: -f1)

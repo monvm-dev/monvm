@@ -354,6 +354,16 @@ write_envoy_listener() {
               common_tls_context:
                 tls_params:
                   tls_minimum_protocol_version: TLSv1_3
+                  signature_algorithms:
+                    - ed25519
+                    - ecdsa_secp256r1_sha256
+                    - rsa_pss_rsae_sha256
+                    - rsa_pkcs1_sha256
+                    - ecdsa_secp384r1_sha384
+                    - rsa_pss_rsae_sha384
+                    - rsa_pkcs1_sha384
+                    - rsa_pss_rsae_sha512
+                    - rsa_pkcs1_sha512
                 alpn_protocols: ["h2", "http/1.1"]
                 tls_certificates:
                   - certificate_chain: { filename: "$root/envoy/server.crt" }
